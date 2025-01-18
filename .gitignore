@@ -10,3 +10,6 @@ eslint.config.js
 
 # vscode file
 .vscode
+
+# misc
+misc/

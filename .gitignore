@@ -4,3 +4,6 @@ node_modules
 # sensitive files
 .env
 config.json
+
+# eslint files
+eslint.config.js

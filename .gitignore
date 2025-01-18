@@ -7,3 +7,6 @@ config.json
 
 # eslint files
 eslint.config.js
+
+# vscode file
+.vscode

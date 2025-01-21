@@ -37,6 +37,12 @@ async function execute(interaction) {
 		interaction.reply('Your input is invalid due to parentheses mismatching');
 		return;
 	}
+	last = input[input.length - 1];
+	first = input[0];
+	if ((!(last >= '0' && last <= '9') && last != ')') || (!(first >= '0' && first <= '9') && first != '(')) {
+		interaction.reply('Your input is invalid, cannot start or end with an operator or invalid character :(');
+		return;
+	}
 
 
 	for (i = 0; i < input.length; i++) {

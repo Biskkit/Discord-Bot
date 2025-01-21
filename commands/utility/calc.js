@@ -27,11 +27,11 @@ async function execute(interaction) {
 		}
 		else {
 			if (c != '+' && c != '-' && c != '*' && c != '/' && c != '(' && c != ')') {
-				interaction.reply('I can only do addition, subtraction, multiplication, and division');
+				interaction.reply('I can only do addition, subtraction, multiplication, and division. \nI can\'t do decimals yet either :(');
 				return;
 			}
 
-			if (c == '+' || c == '-') {
+			if (c == '+' || c == '-' || c == '(') {
 				opStack.push(c);
 			}
 			else if (c == '*' || c == '/') {
@@ -42,9 +42,22 @@ async function execute(interaction) {
 				if (c == '*') numStack.push(num1 * num2);
 				else numStack.push(num1 / num2);
 			}
+			// Here, c = ')', so all calculations should be executed until '(' is found in opStack
+			// Again, only operands left are '+' and '-' since '*' and '/' are calculated the moment they're come across
+			else {
+				op = '';
+				while (opStack[opStack.length - 1] != '(') {
+					num2 = numStack.pop();
+					num1 = numStack.pop();
+					op = opStack.pop();
+					if (op == '+') numStack.push(num1 + num2);
+					else numStack.push(num1 - num2);
+				}
+				opStack.pop();
+			}
 		}
 	}
-	// For this implementation (without parentheses), the only operands that should be left are + and -, since * and / are calculated
+	// The only operands that should be left are + and -, since * and / are calculated
 	// immediately when they're encountered (in the for loop)
 	while (opStack.length) {
 		num2 = numStack.pop();

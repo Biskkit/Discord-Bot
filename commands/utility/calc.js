@@ -18,6 +18,26 @@ async function execute(interaction) {
 	// The RegExp rids the input of any whitespace so that parsing it is much simpler
 	const input = interaction.options.getString('input').replace(/\s*/g, '');
 
+	// Verify that parentheses are valid (each opening parenthesis has a corresponding closing parenthesis)
+	const parStack = [];
+	for (c of input) {
+		if (c == '(') {
+			parStack.push(c);
+		}
+		else if (c == ')') {
+			if (!parStack.length) {
+				interaction.reply('Your input is invalid due to parentheses mismatching');
+				return;
+			}
+			parStack.pop();
+		}
+	}
+	if (parStack.length) {
+		interaction.reply('Your input is invalid due to parentheses mismatching');
+		return;
+	}
+
+
 	for (i = 0; i < input.length; i++) {
 		const c = input[i];
 		if (c >= '0' && c <= '9') {
@@ -88,5 +108,6 @@ function parseNumber(str, pos) {
 	}
 	return [parseInt(result), str.length];
 }
+
 
 module.exports = { data, execute };

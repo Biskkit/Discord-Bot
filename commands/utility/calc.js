@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 // Will store the operands for parsing the string
 const numStack = [];
 // Will store the operators for parsing the string
-// const opStack = [];
+const opStack = [];
 
 const data = new SlashCommandBuilder()
 	.setName('calc')
@@ -26,21 +26,32 @@ async function execute(interaction) {
 			i = pos - 1;
 		}
 		else {
-			if (c != '+' && c != '-') {
-				interaction.reply('I can only do addition and subtraction');
+			if (c != '+' && c != '-' && c != '*' && c != '/' && c != '(' && c != ')') {
+				interaction.reply('I can only do addition, subtraction, multiplication, and division');
 				return;
 			}
-			[num2, pos] = parseNumber(input, i + 1);
-			i = pos - 1;
-			if (c == '+') {
-				num1 = numStack.pop();
-				numStack.push(num1 + num2);
+
+			if (c == '+' || c == '-') {
+				opStack.push(c);
 			}
-			else {
+			else if (c == '*' || c == '/') {
+				[num2, pos] = parseNumber(input, i + 1);
+				i = pos - 1;
 				num1 = numStack.pop();
-				numStack.push(num1 - num2);
+
+				if (c == '*') numStack.push(num1 * num2);
+				else numStack.push(num1 / num2);
 			}
 		}
+	}
+	// For this implementation (without parentheses), the only operands that should be left are + and -, since * and / are calculated
+	// immediately when they're encountered (in the for loop)
+	while (opStack.length) {
+		num2 = numStack.pop();
+		num1 = numStack.pop();
+		op = opStack.pop();
+		if (op == '+') numStack.push(num1 + num2);
+		else numStack.push(num1 - num2);
 	}
 	const result = numStack.pop();
 	interaction.reply(result.toString());

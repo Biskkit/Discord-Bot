@@ -4,7 +4,8 @@ const { SlashCommandBuilder } = require('discord.js');
 const numStack = [];
 // Will store the operators for parsing the string
 const opStack = [];
-
+// Set of operators to enable O(1) member checking
+const opSet = new Set(['+', '-', '/', '*']);
 const data = new SlashCommandBuilder()
 	.setName('calc')
 	.setDescription('Will do simple mathematical calculations with integers')
@@ -46,8 +47,13 @@ async function execute(interaction) {
 			i = pos - 1;
 		}
 		else {
-			if (c != '+' && c != '-' && c != '*' && c != '/' && c != '(' && c != ')') {
-				interaction.reply('I can only do addition, subtraction, multiplication, and division. \nI can\'t do decimals yet either :(');
+			if (!opSet.has(c) && c != '(' && c != ')') {
+				interaction.reply('Your input is invalid. Note: I can\'t do decimals yet :(');
+				return;
+			}
+			// Validates that each operator and each parenthesis is followed by a number
+			if (opSet.has(input[i + 1])) {
+				interaction.reply('Your input is invalid');
 				return;
 			}
 

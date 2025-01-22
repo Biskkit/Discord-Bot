@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Collection, MessageFlags } = require('discord.js');
 const dotenv = require('dotenv');
 
 // loads the values in the .env file into process.env
@@ -73,12 +73,14 @@ client.on(Events.InteractionCreate, async interaction => {
 		await command.execute(interaction);
 	}
 	catch (err) {
-		console.error(err);
+		// console.log(err.message);
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+			await interaction.followUp({ content: err.message, flags: MessageFlags.Ephemeral });
+			// interaction.followUp(err.message);
 		}
 		else {
-			await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+			// interaction.reply(err.message);
+			await interaction.reply({ content: err.message, flags: MessageFlags.Ephemeral });
 		}
 	}
 });

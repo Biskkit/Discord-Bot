@@ -19,6 +19,36 @@ async function execute(interaction) {
 	// The RegExp rids the input of any whitespace so that parsing it is much simpler
 	const input = interaction.options.getString('input').replace(/\s*/g, '');
 
+	// This will parse a number from the string, starting at the given position
+	// Complexity: O(n), n being the length of the number, max time is length of string
+	// Returns: Parsed number, and ending position
+	// Note: the ending position will be one after the ending digit in the parsed number
+	// Example: '555a' will return [555, 3], '2005fjdk' will return [2005, 4]
+	function parseNumber(str, pos) {
+		if (pos > str.length) return;
+		let result = '';
+		decCount = 0;
+		for (i = pos; i < str.length; i++) {
+			if (str[i] >= '0' && str[i] <= '9') {
+				result += str[i];
+			}
+			else if (str[i] == '.') {
+				if (decCount < 1) {
+					result += str[i];
+					decCount += 1;
+				}
+				else {
+					throw new Error('Invalid input, multiple decimal points');
+				}
+			}
+			else {
+				return [parseFloat(result), i];
+			}
+		}
+		return [parseFloat(result), str.length];
+	}
+
+
 	// Verify that parentheses are valid (each opening parenthesis has a corresponding closing parenthesis)
 	const parStack = [];
 	for (c of input) {
@@ -27,40 +57,35 @@ async function execute(interaction) {
 		}
 		else if (c == ')') {
 			if (!parStack.length) {
-				interaction.reply('Your input is invalid due to parentheses mismatching');
-				return;
+				throw new Error('Your input is invalid due to parentheses mismatching');
 			}
 			parStack.pop();
 		}
 	}
 	if (parStack.length) {
-		interaction.reply('Your input is invalid due to parentheses mismatching');
-		return;
+		throw new Error('Your input is invalid due to parentheses mismatching');
 	}
 	last = input[input.length - 1];
 	first = input[0];
 	if ((!(last >= '0' && last <= '9') && last != ')') || (!(first >= '0' && first <= '9') && first != '(')) {
-		interaction.reply('Your input is invalid, cannot start or end with an operator or invalid character :(');
-		return;
+		throw new Error('Your input is invalid, can\'t begin or end with operators or invalid characters');
 	}
 
 
 	for (i = 0; i < input.length; i++) {
 		const c = input[i];
-		if (c >= '0' && c <= '9') {
+		if (c >= '0' && c <= '9' || c == '.') {
 			[num, pos] = parseNumber(input, i);
 			numStack.push(num);
 			i = pos - 1;
 		}
 		else {
 			if (!opSet.has(c) && c != '(' && c != ')') {
-				interaction.reply('Your input is invalid. Note: I can\'t do decimals yet :(');
-				return;
+				throw new Error('Invalid input');
 			}
 			// Validates that each operator and each parenthesis is followed by a number
 			if (opSet.has(input[i + 1])) {
-				interaction.reply('Your input is invalid');
-				return;
+				throw new Error('Invalid input');
 			}
 
 			if (c == '+' || c == '-' || c == '(') {
@@ -98,28 +123,9 @@ async function execute(interaction) {
 		if (op == '+') numStack.push(num1 + num2);
 		else numStack.push(num1 - num2);
 	}
-	const result = numStack.pop();
-	interaction.reply(result.toString());
+	result = numStack.pop();
+	result = parseFloat(result.toPrecision(12));
+	await interaction.reply(result.toString());
 }
-
-// This will parse a number from the string, starting at the given position
-// Complexity: O(n), n being the length of the number, max time is length of string
-// Returns: Parsed number, and ending position
-// Note: the ending position will be one after the ending digit in the parsed number
-// Example: '555a' will return [555, 3], '2005fjdk' will return [2005, 4]
-function parseNumber(str, pos) {
-	if (pos > str.length) return;
-	let result = '';
-	for (i = pos; i < str.length; i++) {
-		if (str[i] >= '0' && str[i] <= '9') {
-			result += str[i];
-		}
-		else {
-			return [parseInt(result), i];
-		}
-	}
-	return [parseInt(result), str.length];
-}
-
 
 module.exports = { data, execute };
